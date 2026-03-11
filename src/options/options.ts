@@ -6,6 +6,7 @@ import { getSettings, saveSettings, parsePort } from '../shared/utils.js';
 
 // DOM Elements
 const elements = {
+  hostInput: document.getElementById('host') as HTMLInputElement,
   portInput: document.getElementById('port') as HTMLInputElement,
   tokenInput: document.getElementById('token') as HTMLInputElement,
   autoAttachInput: document.getElementById('autoAttach') as HTMLInputElement,
@@ -21,6 +22,7 @@ async function loadSettings(): Promise<void> {
   try {
     const settings = await getSettings();
     
+    elements.hostInput.value = settings.relayHost;
     elements.portInput.value = String(settings.relayPort);
     elements.tokenInput.value = settings.gatewayToken;
     elements.autoAttachInput.checked = settings.autoAttach;
@@ -34,6 +36,7 @@ async function loadSettings(): Promise<void> {
 
 // Save settings
 async function save(): Promise<void> {
+  const host = elements.hostInput.value.trim() || '127.0.0.1';
   const port = parsePort(elements.portInput.value);
   const token = elements.tokenInput.value.trim();
   const autoAttach = elements.autoAttachInput.checked;
@@ -48,12 +51,14 @@ async function save(): Promise<void> {
     elements.saveButton.textContent = 'Saving...';
     
     await saveSettings({
+      relayHost: host,
       relayPort: port,
       gatewayToken: token,
       autoAttach,
     });
     
     // Update inputs with normalized values
+    elements.hostInput.value = host;
     elements.portInput.value = String(port);
     
     showStatus('ok', 'Settings saved successfully');
@@ -78,14 +83,14 @@ async function testConnection(): Promise<void> {
     });
     
     if (response.success) {
-      const { connected, port, hasToken } = response.data;
+      const { connected, host, port, hasToken } = response.data;
       
       if (!hasToken) {
         showStatus('error', 'Gateway token not configured');
       } else if (connected) {
-        showStatus('ok', `Connected to relay on port ${port}`);
+        showStatus('ok', `Connected to relay at ${host}:${port}`);
       } else {
-        showStatus('error', `Cannot connect to relay on port ${port}. Make sure OpenClaw Gateway is running.`);
+        showStatus('error', `Cannot connect to relay at ${host}:${port}. Make sure OpenClaw Gateway is running.`);
       }
     } else {
       showStatus('error', response.error || 'Connection test failed');
@@ -108,7 +113,7 @@ async function updateStatus(): Promise<void> {
     });
     
     if (response.success) {
-      const { connected, hasToken } = response.data;
+      const { connected, host, port, hasToken } = response.data;
       
       if (!hasToken) {
         elements.connectionStatus.textContent = 'Not configured - Please set gateway token';

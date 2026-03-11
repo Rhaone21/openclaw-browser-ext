@@ -2,7 +2,7 @@
  * Shared utilities for OpenClaw Browser Extension
  */
 
-import { DEFAULT_RELAY_PORT } from './constants.js';
+import { DEFAULT_RELAY_PORT, DEFAULT_RELAY_HOST } from './constants.js';
 import type { RelayConfig, ExtensionSettings } from './types.js';
 
 /**
@@ -91,12 +91,14 @@ export async function deriveRelayToken(
  */
 export async function getSettings(): Promise<ExtensionSettings> {
   const stored = await chrome.storage.local.get([
+    'relayHost',
     'relayPort',
     'gatewayToken',
     'autoAttach',
   ]);
   
   return {
+    relayHost: String(stored.relayHost || DEFAULT_RELAY_HOST),
     relayPort: parsePort(stored.relayPort),
     gatewayToken: String(stored.gatewayToken || ''),
     autoAttach: Boolean(stored.autoAttach),

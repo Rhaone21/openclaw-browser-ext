@@ -7,6 +7,7 @@ export const DEFAULT_RELAY_HOST = '127.0.0.1';
 export const RELAY_WS_PATH = '/ws';
 
 export const STORAGE_KEYS = {
+  RELAY_HOST: 'relayHost',
   RELAY_PORT: 'relayPort',
   GATEWAY_TOKEN: 'gatewayToken',
   AUTO_ATTACH: 'autoAttach',

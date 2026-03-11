@@ -22,6 +22,7 @@ interface ConnectionState {
   reconnectAttempt: number;
   reconnectTimer: ReturnType<typeof setTimeout> | null;
   gatewayToken: string;
+  host: string;
   port: number;
 }
 
@@ -43,6 +44,7 @@ export class RelayConnection {
     reconnectAttempt: 0,
     reconnectTimer: null,
     gatewayToken: '',
+    host: DEFAULT_RELAY_HOST,
     port: DEFAULT_RELAY_PORT,
   };
 
@@ -52,8 +54,9 @@ export class RelayConnection {
   /**
    * Initialize connection with gateway token
    */
-  async initialize(gatewayToken: string, port: number = DEFAULT_RELAY_PORT): Promise<void> {
+  async initialize(gatewayToken: string, host: string = DEFAULT_RELAY_HOST, port: number = DEFAULT_RELAY_PORT): Promise<void> {
     this.state.gatewayToken = gatewayToken;
+    this.state.host = host;
     this.state.port = port;
     await this.connect();
   }
@@ -77,7 +80,7 @@ export class RelayConnection {
 
     try {
       const config: RelayConfig = {
-        host: DEFAULT_RELAY_HOST,
+        host: this.state.host,
         port: this.state.port,
         token: this.state.gatewayToken,
       };

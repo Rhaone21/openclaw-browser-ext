@@ -256,7 +256,15 @@
         <div class="card">
           <h2>Connection Settings</h2>
           
-          <label for="port">Relay Port</label>
+          <label for="host">Relay Host</label>
+          <div class="row">
+            <input id="host" type="text" placeholder="127.0.0.1" />
+          </div>
+          <div class="hint">
+            Default: <code>127.0.0.1</code>. Change this if connecting to a VM/VPS.
+          </div>
+
+          <label for="port" style="margin-top: 16px">Relay Port</label>
           <div class="row">
             <input id="port" type="number" min="1" max="65535" placeholder="18792" />
           </div>

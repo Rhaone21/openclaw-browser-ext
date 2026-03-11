@@ -23,6 +23,7 @@ export interface RelayConfig {
 }
 
 export interface ExtensionSettings {
+  relayHost: string;
   relayPort: number;
   gatewayToken: string;
   autoAttach: boolean;

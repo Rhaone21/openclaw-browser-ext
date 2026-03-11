@@ -43,7 +43,7 @@ async function initialize(): Promise<void> {
 
   // Connect to relay if token is set
   if (settings.gatewayToken) {
-    await relay.initialize(settings.gatewayToken, settings.relayPort);
+    await relay.initialize(settings.gatewayToken, settings.relayHost, settings.relayPort);
   } else {
     console.log('[OpenClaw] No gateway token set, waiting for configuration');
     await badgeManager.setGlobalBadge('ERROR');
@@ -167,6 +167,7 @@ async function handleMessage(
           success: true,
           data: {
             connected: isConnected,
+            host: settings.relayHost,
             port: settings.relayPort,
             hasToken: !!settings.gatewayToken,
           },
@@ -196,9 +197,18 @@ chrome.storage.onChanged.addListener(async (changes, areaName) => {
     
     if (newToken) {
       relay.disconnect();
-      await relay.initialize(newToken, settings.relayPort);
+      await relay.initialize(newToken, settings.relayHost, settings.relayPort);
     } else {
       relay.disconnect();
+    }
+  }
+
+  // If host changed, reconnect with new host
+  if (changes.relayHost) {
+    const settings = await getSettings();
+    if (settings.gatewayToken) {
+      relay.disconnect();
+      await relay.initialize(settings.gatewayToken, settings.relayHost, settings.relayPort);
     }
   }
 
@@ -207,7 +217,7 @@ chrome.storage.onChanged.addListener(async (changes, areaName) => {
     const settings = await getSettings();
     if (settings.gatewayToken) {
       relay.disconnect();
-      await relay.initialize(settings.gatewayToken, settings.relayPort);
+      await relay.initialize(settings.gatewayToken, settings.relayHost, settings.relayPort);
     }
   }
 });
