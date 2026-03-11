@@ -10,7 +10,8 @@
     "clean": "rm -rf dist",
     "dev": "npm run clean && npm run build && npm run build:watch",
     "lint": "eslint src/**/*.ts",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "update-deps": "npm update && npm audit fix"
   },
   "keywords": [
     "openclaw",
@@ -22,10 +23,13 @@
   "author": "Rhaone <rhaone@openclaw.ai>",
   "license": "MIT",
   "devDependencies": {
-    "@types/chrome": "^0.0.268",
-    "@typescript-eslint/eslint-plugin": "^7.0.0",
-    "@typescript-eslint/parser": "^7.0.0",
-    "eslint": "^8.57.0",
-    "typescript": "^5.3.3"
+    "@types/chrome": "^0.0.270",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
+    "eslint": "^8.57.1",
+    "typescript": "^5.8.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
