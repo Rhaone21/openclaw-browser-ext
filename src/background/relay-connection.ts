@@ -247,26 +247,36 @@ export class RelayConnection {
     
     const connectRequestId = `ext-connect-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
     
+    const params: Record<string, unknown> = {
+      minProtocol: 3,
+      maxProtocol: 3,
+      client: {
+        id: 'chrome-relay-extension',
+        version: '1.0.0',
+        platform: 'chrome-extension',
+        mode: 'webchat',
+      },
+      role: 'operator',
+      scopes: ['operator.read', 'operator.write'],
+      caps: [],
+      commands: [],
+    };
+    
+    // Only add nonce if provided
+    if (nonce) {
+      params.nonce = nonce;
+    }
+    
+    // Only add auth if token exists
+    if (this.state.gatewayToken) {
+      params.auth = { token: this.state.gatewayToken };
+    }
+    
     ws.send(JSON.stringify({
       type: 'req',
       id: connectRequestId,
       method: 'connect',
-      params: {
-        minProtocol: 3,
-        maxProtocol: 3,
-        client: {
-          id: 'chrome-relay-extension',
-          version: '1.0.0',
-          platform: 'chrome-extension',
-          mode: 'webchat',
-        },
-        role: 'operator',
-        scopes: ['operator.read', 'operator.write'],
-        caps: [],
-        commands: [],
-        nonce: nonce || undefined,
-        auth: this.state.gatewayToken ? { token: this.state.gatewayToken } : undefined,
-      },
+      params,
     }));
   }
 }
