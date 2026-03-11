@@ -111,8 +111,22 @@ export class RelayConnection {
 
       ws.onmessage = (event) => {
         try {
-          const message = JSON.parse(event.data) as CDPMessage;
-          this.callbacks?.onMessage(message);
+          const message = JSON.parse(event.data) as Record<string, unknown>;
+          
+          // Handle auth challenge
+          if (message.type === 'event' && message.event === 'connect.challenge') {
+            const payload = message.payload as { nonce: string; ts: number };
+            this.handleAuthChallenge(ws, payload.nonce, payload.ts);
+            return;
+          }
+          
+          // Handle auth success
+          if (message.type === 'event' && message.event === 'connect.authenticated') {
+            console.log('[OpenClaw] Authenticated successfully');
+            return;
+          }
+          
+          this.callbacks?.onMessage(message as CDPMessage);
         } catch (err) {
           console.error('Failed to parse message:', err);
         }
@@ -223,6 +237,20 @@ export class RelayConnection {
         this.send(message);
       }
     }
+  }
+
+  /**
+   * Handle auth challenge from gateway
+   */
+  private handleAuthChallenge(ws: WebSocket, nonce: string, _ts: number): void {
+    console.log('[OpenClaw] Received auth challenge, responding...');
+    
+    // Simple auth response - just echo back the nonce with token
+    ws.send(JSON.stringify({
+      type: 'auth',
+      token: this.state.gatewayToken,
+      nonce: nonce,
+    }));
   }
 }
 
