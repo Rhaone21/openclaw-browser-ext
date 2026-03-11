@@ -82,16 +82,12 @@ export class RelayConnection {
         token: this.state.gatewayToken,
       };
 
-      const relayToken = await deriveRelayToken(this.state.gatewayToken, this.state.port);
-      const wsUrl = `${buildRelayWsUrl(config)}?token=${encodeURIComponent(relayToken)}`;
-
+      const wsUrl = buildRelayWsUrl(config);
       const ws = new WebSocket(wsUrl);
 
       ws.onopen = () => {
-        this.state.isConnecting = false;
-        this.state.reconnectAttempt = 0;
-        this.flushMessageQueue();
-        this.callbacks?.onOpen();
+        // Wait for connect.challenge before sending connect
+        console.log('[OpenClaw] WebSocket opened, waiting for challenge...');
       };
 
       ws.onclose = (event) => {
@@ -116,13 +112,17 @@ export class RelayConnection {
           // Handle auth challenge
           if (message.type === 'event' && message.event === 'connect.challenge') {
             const payload = message.payload as { nonce: string; ts: number };
-            this.handleAuthChallenge(ws, payload.nonce, payload.ts);
+            this.handleConnectChallenge(ws, payload.nonce);
             return;
           }
           
           // Handle auth success
           if (message.type === 'event' && message.event === 'connect.authenticated') {
             console.log('[OpenClaw] Authenticated successfully');
+            this.state.isConnecting = false;
+            this.state.reconnectAttempt = 0;
+            this.flushMessageQueue();
+            this.callbacks?.onOpen();
             return;
           }
           
@@ -240,16 +240,33 @@ export class RelayConnection {
   }
 
   /**
-   * Handle auth challenge from gateway
+   * Handle connect challenge from gateway
    */
-  private handleAuthChallenge(ws: WebSocket, nonce: string, _ts: number): void {
-    console.log('[OpenClaw] Received auth challenge, responding...');
+  private handleConnectChallenge(ws: WebSocket, nonce: string): void {
+    console.log('[OpenClaw] Received connect challenge, sending connect...');
     
-    // Simple auth response - just echo back the nonce with token
+    const connectRequestId = `ext-connect-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
+    
     ws.send(JSON.stringify({
-      type: 'auth',
-      token: this.state.gatewayToken,
-      nonce: nonce,
+      type: 'req',
+      id: connectRequestId,
+      method: 'connect',
+      params: {
+        minProtocol: 3,
+        maxProtocol: 3,
+        client: {
+          id: 'chrome-relay-extension',
+          version: '1.0.0',
+          platform: 'chrome-extension',
+          mode: 'webchat',
+        },
+        role: 'operator',
+        scopes: ['operator.read', 'operator.write'],
+        caps: [],
+        commands: [],
+        nonce: nonce || undefined,
+        auth: this.state.gatewayToken ? { token: this.state.gatewayToken } : undefined,
+      },
     }));
   }
 }
