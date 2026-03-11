@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OpenClaw Browser Relay</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --accent: #ff5a36;
+        --panel: color-mix(in oklab, canvas 92%, canvasText 8%);
+        --border: color-mix(in oklab, canvasText 18%, transparent);
+        --muted: color-mix(in oklab, canvasText 70%, transparent);
+        font-family: ui-rounded, system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Rounded",
+          "SF Pro Display", "Segoe UI", sans-serif;
+        line-height: 1.4;
+      }
+      
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      
+      body {
+        width: 360px;
+        min-height: 200px;
+        padding: 16px;
+        background: canvas;
+        color: canvasText;
+      }
+      
+      header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--border);
+      }
+      
+      .logo {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        background: color-mix(in oklab, var(--accent) 18%, transparent);
+        display: grid;
+        place-items: center;
+      }
+      
+      .logo img {
+        width: 20px;
+        height: 20px;
+      }
+      
+      h1 {
+        font-size: 16px;
+        font-weight: 600;
+      }
+      
+      .actions {
+        margin-bottom: 16px;
+      }
+      
+      button {
+        width: 100%;
+        padding: 10px 14px;
+        border-radius: 10px;
+        border: 1px solid color-mix(in oklab, var(--accent) 55%, transparent);
+        background: linear-gradient(
+          180deg,
+          color-mix(in oklab, var(--accent) 80%, white 20%),
+          var(--accent)
+        );
+        color: white;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        transition: opacity 0.2s;
+      }
+      
+      button:hover {
+        opacity: 0.9;
+      }
+      
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      
+      .tab-list {
+        max-height: 200px;
+        overflow-y: auto;
+      }
+      
+      .tab-list h2 {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--muted);
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      
+      .tab-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px;
+        border-radius: 8px;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        margin-bottom: 8px;
+      }
+      
+      .tab-item.current {
+        border-color: color-mix(in oklab, var(--accent) 50%, transparent);
+      }
+      
+      .tab-info {
+        flex: 1;
+        min-width: 0;
+      }
+      
+      .tab-title {
+        font-size: 13px;
+        font-weight: 500;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      
+      .tab-url {
+        font-size: 11px;
+        color: var(--muted);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      
+      .tab-status {
+        font-size: 10px;
+        padding: 2px 6px;
+        border-radius: 4px;
+        text-transform: uppercase;
+        font-weight: 600;
+      }
+      
+      .tab-status.connected {
+        background: color-mix(in oklab, #16a34a 20%, transparent);
+        color: #16a34a;
+      }
+      
+      .tab-status.connecting {
+        background: color-mix(in oklab, #f59e0b 20%, transparent);
+        color: #f59e0b;
+      }
+      
+      .tab-status.error {
+        background: color-mix(in oklab, #ef4444 20%, transparent);
+        color: #ef4444;
+      }
+      
+      .detach-btn {
+        width: auto;
+        padding: 4px 10px;
+        font-size: 11px;
+        background: transparent;
+        color: var(--muted);
+        border: 1px solid var(--border);
+      }
+      
+      .detach-btn:hover {
+        color: #ef4444;
+        border-color: #ef4444;
+      }
+      
+      .empty, .error {
+        text-align: center;
+        padding: 20px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      
+      .error {
+        color: #ef4444;
+      }
+      
+      .status {
+        margin-top: 12px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        font-size: 12px;
+        text-align: center;
+      }
+      
+      .status[data-kind="ok"] {
+        background: color-mix(in oklab, #16a34a 15%, transparent);
+        color: #16a34a;
+      }
+      
+      .status[data-kind="error"] {
+        background: color-mix(in oklab, #ef4444 15%, transparent);
+        color: #ef4444;
+      }
+      
+      .footer {
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid var(--border);
+        text-align: center;
+      }
+      
+      .footer a {
+        font-size: 12px;
+        color: var(--muted);
+        text-decoration: none;
+      }
+      
+      .footer a:hover {
+        color: var(--accent);
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="logo">
+        <img src="icons/icon32.png" alt="" />
+      </div>
+      <h1>OpenClaw Browser Relay</h1>
+    </header>
+    
+    <div class="actions">
+      <button id="attachButton">Attach</button>
+    </div>
+    
+    <div class="tab-list">
+      <h2>Attached Tabs</h2>
+      <div id="tabList">
+        <p class="empty">No attached tabs</p>
+      </div>
+    </div>
+    
+    <div class="status" id="status"></div>
+    
+    <div class="footer">
+      <a href="options.html" target="_blank">Settings</a>
+    </div>
+    
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>

@@ -1,0 +1,31 @@
+{
+  "name": "openclaw-browser-ext",
+  "version": "1.0.0",
+  "description": "OpenClaw Browser Extension - CDP Relay for AI Browser Automation",
+  "main": "dist/background.js",
+  "scripts": {
+    "build": "tsc && npm run copy-assets",
+    "build:watch": "tsc --watch",
+    "copy-assets": "cp -r public/* dist/ && cp -r icons dist/ 2>/dev/null || true",
+    "clean": "rm -rf dist",
+    "dev": "npm run clean && npm run build && npm run build:watch",
+    "lint": "eslint src/**/*.ts",
+    "type-check": "tsc --noEmit"
+  },
+  "keywords": [
+    "openclaw",
+    "browser-automation",
+    "cdp",
+    "chrome-extension",
+    "ai-agent"
+  ],
+  "author": "Rhaone <rhaone@openclaw.ai>",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/chrome": "^0.0.268",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "eslint": "^8.57.0",
+    "typescript": "^5.3.3"
+  }
+}
